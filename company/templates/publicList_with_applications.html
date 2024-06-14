@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard</title>
+  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    /* Custom CSS for sidebar */
+    .sidebar {
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      z-index: 100;
+      padding: 48px 0 0;
+      box-shadow: inset -1px 0 0 rgba(0, 0, 0, 0.1);
+      background-color: #e2f0cb; /* Light green background color */
+    }
+    .sidebar-sticky {
+      position: relative;
+      top: 0;
+      height: calc(100vh - 48px);
+      padding-top: 0.5rem;
+      overflow-x: hidden;
+      overflow-y: auto;
+    }
+    .sidebar .nav-link {
+      font-weight: 500;
+      color: #333;
+    }
+    .sidebar .nav-link.active {
+      color: #007bff;
+    }
+    .sidebar .nav-link:hover {
+      color: #007bff;
+    }
+    .sidebar-heading {
+      color: #333; /* Dark green color for sidebar heading */
+      padding: 10px;
+      background-color: #cde5b7; /* Light green color for sidebar heading background */
+      margin-bottom: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container-fluid">
+    <div class="row">
+      <!-- Sidebar -->
+      <nav class="col-md-3 col-lg-2 d-md-block bg-light sidebar">
+        <div class="sidebar-sticky">
+          <h6 class="sidebar-heading">Dashboard</h6>
+          <ul class="nav flex-column">
+            <li class="nav-item">
+              <a class="nav-link active" href="{% url 'job' %}">
+                <span data-feather="home"></span>
+                Jobs <span class="sr-only">(current)</span>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'company_login' %}">
+                <span data-feather="shopping-cart"></span>
+                Logout
+              </a>
+            </li>
+            
+          </ul>
+        </div>
+      </nav>
+
+      <!-- Page Content -->
+      <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
+        <!-- Top right corner: Add New Job Button -->
+       
+
+        <!-- Table View -->
+        <h1>Jobs</h1>
+        <div class="table-responsive">
+          <table class="table table-bordered">
+            <thead>
+              <tr>
+                <th scope="col">Title</th>
+                <th scope="col">Description</th>
+                <th scope="col">Applied User Details</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for job in jobs %}
+              <tr>
+                <td>{{ job.title }}</td>
+                <td>{{ job.description }}</td>
+                <td>
+                  {% for user_email in job.applied_users %}
+                      {{ user_email }}<br>
+                  {% endfor %}
+              </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </main>
+    </div>
+  </div>
+</body>
+</html>

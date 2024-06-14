@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard</title>
+  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+  
+    /* Custom CSS for sidebar */
+    .sidebar {
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      z-index: 100;
+      padding: 48px 0 0;
+      box-shadow: inset -1px 0 0 rgba(0, 0, 0, 0.1);
+      background-color: #e2f0cb; /* Light green background color */
+    }
+    .sidebar-sticky {
+      position: relative;
+      top: 0;
+      height: calc(100vh - 48px);
+      padding-top: 0.5rem;
+      overflow-x: hidden;
+      overflow-y: auto;
+    }
+    .sidebar .nav-link {
+      font-weight: 500;
+      color: #333;
+    }
+    .sidebar .nav-link.active {
+      color: #007bff;
+    }
+    .sidebar .nav-link:hover {
+      color: #007bff;
+    }
+    .sidebar-heading {
+      color: #333; /* Dark green color for sidebar heading */
+      padding: 10px;
+      background-color: #cde5b7; /* Light green color for sidebar heading background */
+      margin-bottom: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container-fluid">
+    <div class="row">
+      <!-- Sidebar -->
+      <nav class="col-md-3 col-lg-2 d-md-block bg-light sidebar">
+        <div class="sidebar-sticky">
+          <h6 class="sidebar-heading">Dashboard</h6>
+          <ul class="nav flex-column">
+            <li class="nav-item">
+              <a class="nav-link active" href="#">
+                <span data-feather="home"></span>
+                Jobs <span class="sr-only">(current)</span>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'user_login' %}">
+                <span data-feather="shopping-cart"></span>
+                Logout
+              </a>
+            </li>
+          </ul>
+        </div>
+      </nav>
+
+      <!-- Page Content -->
+      <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
+        <!-- Top right corner: Add New Job Button -->
+       
+        <!-- Table View -->
+        <h1>Jobs</h1>
+        <div class="table-responsive">
+          <table class="table table-bordered">
+            <thead>
+              <tr>
+                <th scope="col">Title</th>
+                <th scope="col">Description</th>
+                <th scope="col">Quick apply</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for job in jobs %}
+              <tr>
+                <td>{{ job.title }}</td>
+                <td>{{ job.description }}</td>
+                <td>
+                  <form action="{% url 'apply_job' job.id %}" method="post" onsubmit="handleApply(event, {{ job.id }})">
+                    {% csrf_token %}
+                    <button id="apply-btn-{{ job.id }}" type="submit" class="btn btn-danger">Apply</button>
+                  </form>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      function handleApply(event, jobId) {
+        event.preventDefault(); // Prevent the default form submission
+        
+        // Get the button by ID
+        const button = document.getElementById(`apply-btn-${jobId}`);
+        
+        // Change the button text and styles
+        button.textContent = 'Applied';
+        button.classList.remove('btn-danger');
+        button.classList.add('btn-success');
+        button.style.color = 'white';
+        
+        // Disable the button to prevent further clicks
+        button.disabled = true;
+        
+        // Perform the AJAX request to submit the form
+        const form = event.target;
+        const formData = new FormData(form);
+        
+        fetch(form.action, {
+          method: 'POST',
+          body: formData,
+          headers: {
+            'X-CSRFToken': formData.get('csrfmiddlewaretoken') // For Django CSRF token
+          }
+        })
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Network response was not ok');
+          }
+          return response.json();
+        })
+        .then(data => {
+          // Handle success, e.g., display a message or update the UI
+          console.log('Success:', data);
+        })
+        .catch(error => {
+          // Handle error, e.g., display an error message or revert the button state
+          console.error('Error:', error);
+          button.textContent = 'Apply';
+          button.classList.remove('btn-success');
+          button.classList.add('btn-danger');
+          button.style.color = '';
+          button.disabled = false;
+        });
+      }
+
+      // Attach the handleApply function to all forms
+      document.querySelectorAll('form').forEach(form => {
+        form.addEventListener('submit', function (event) {
+          const jobId = this.querySelector('button').id.split('-')[2];
+          handleApply(event, jobId);
+        });
+      });
+    });
+  </script>
+</body>
+</html>
